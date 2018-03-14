@@ -2,18 +2,15 @@ import React, { Component, Fragment } from 'react';
 import { Route, Link } from 'react-router-dom';
 
 const Context = React.createContext();
+const { Provider, Consumer } = Context;
 
-class Provider extends Component {
+class StateProvider extends Component {
   state = {
     name: 'Joe',
     age: 30
   };
   render() {
-    return (
-      <Context.Provider value={this.state}>
-        {this.props.children}
-      </Context.Provider>
-    );
+    return <Provider value={this.state}>{this.props.children}</Provider>;
   }
 }
 
@@ -33,28 +30,26 @@ const Home = props => {
 
 const About = props => {
   return (
-    <Context.Consumer>
+    <Consumer>
       {context => (
         <Fragment>
           <p>Name: {context.name}</p>
           <p>Age: {context.age}</p>
         </Fragment>
       )}
-    </Context.Consumer>
+    </Consumer>
   );
 };
 
-class App extends Component {
-  render() {
-    return (
-      <Provider>
-        <Fragment>
-          <Route exact path="/" component={Home} />
-          <Route exact path="/about" component={About} />
-        </Fragment>
-      </Provider>
-    );
-  }
-}
+const App = props => {
+  return (
+    <StateProvider>
+      <Fragment>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/about" component={About} />
+      </Fragment>
+    </StateProvider>
+  );
+};
 
 export default App;
