@@ -1,53 +1,60 @@
 import React, { Component, Fragment } from 'react';
-import { Route, Link } from 'react-router-dom';
 
 const Context = React.createContext();
 const { Provider, Consumer } = Context;
 
+const coinPriceStyles = {
+  margin: `35vh auto`,
+  padding: `15px`,
+  width: `35%`,
+  display: `grid`,
+  gridTemplateRows: `1fr 1fr`,
+  alignItems: `center`,
+  justifyItems: `center`,
+  background: `#fff`,
+  borderRadius: `4px`,
+  boxShadow: `0px 2px 10px 0px rgba(0, 0, 0, 0.5)`,
+  fontSize: `2em`
+};
+
 class StateProvider extends Component {
   state = {
-    name: 'Joe',
-    age: 30
+    loading: true,
+    data: {}
   };
+  componentWillMount() {
+    fetch(`https://api.coindesk.com/v1/bpi/currentprice.json`)
+      .then(data => data.json())
+      .then(data => {
+        this.setState({ data: data, loading: false });
+      });
+  }
   render() {
     return <Provider value={this.state}>{this.props.children}</Provider>;
   }
 }
 
-const Home = props => {
+const CoinPrice = props => {
   return (
-    <Fragment>
-      <Link
-        to={{
-          pathname: '/about'
-        }}
-      >
-        About Joe
-      </Link>
-    </Fragment>
+    <div style={coinPriceStyles}>
+      <span>Current BTC Price</span>
+      {props.loading ? (
+        <span>Loading BTC price...</span>
+      ) : (
+        <span>${props.data.bpi.USD.rate}</span>
+      )}
+    </div>
   );
 };
 
-const About = props => {
-  return (
-    <Consumer>
-      {context => (
-        <Fragment>
-          <p>Name: {context.name}</p>
-          <p>Age: {context.age}</p>
-        </Fragment>
-      )}
-    </Consumer>
-  );
+const CoinData = props => {
+  return <Consumer>{context => <CoinPrice {...context} />}</Consumer>;
 };
 
 const App = props => {
   return (
     <StateProvider>
-      <Fragment>
-        <Route exact path="/" component={Home} />
-        <Route exact path="/about" component={About} />
-      </Fragment>
+      <CoinData />
     </StateProvider>
   );
 };
